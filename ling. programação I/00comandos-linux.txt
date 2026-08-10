@@ -1,0 +1,5 @@
+clear: limpa tela
+ls: listagem dos diretórios (arquivos, pastas) de onde se encontra // pasta que começa com "." não aparece
+mkdir: cria diretório (make directory)
+cd: entra no diretório (change directory)
+code .: entra no VS Code
