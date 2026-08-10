@@ -2,5 +2,19 @@
 
 int main() {
     printf("Olá, mundo!\n");
-    return 0;
+
+    float altura;
+    int idade;
+
+    altura = 1.75;  
+    idade = 25;       
+                             //placeholder - formata a string
+    printf("Altura definida: %.2fm\n", altura);
+    printf("Idade definida: %i anos\n", idade);
+
+    printf("Digite sua altura: ");
+    scanf("%f",&altura);
+    printf("Altura digitada: %.2fm\n", altura);
+
+    return 0; //nao faz diferença com ou sem ?
 }
