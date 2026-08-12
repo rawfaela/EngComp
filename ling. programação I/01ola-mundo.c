@@ -5,7 +5,8 @@ int main() {
 
     float altura;
     int idade;
-    char nome[50] = "João";
+    char letra = 'a'; //se for só uma letra (um char), usa aspas simples
+    char nome[50] = "João"; //uma string, aspas duplas
 
     altura = 1.75;  
     idade = 25;       
