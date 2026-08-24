@@ -46,14 +46,26 @@ int main()
             printf("Digite o nome da pessoa: ");
             scanf("%s",nomeaux);
             strcpy(listaPessoas[aux].nome,nomeaux);
-            
-            printf("nome dg: %s \n",listaPessoas[aux].nome); //aq pra teste só
             aux++;
 
-            break;
-        
+        break;
+        case 2:
+            for (int i = 0; i<aux; i++)
+            {
+                printf("nome %i: %s \n",i,listaPessoas[i].nome);
+            }
+        break;
+        case 3:
+            printf("Saindo!\n");
+        break;
         default:
-            break;
+            printf("Opção inválida.");
+        break;
         }
+    }
+    printf("Pessoas cadastradas: \n");
+    for (int i = 0; i<aux; i++)
+    {
+        printf("nome %i: %s \n",i,listaPessoas[i].nome);
     }
 }
