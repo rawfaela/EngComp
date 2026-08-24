@@ -81,3 +81,5 @@ int main()
         printf("peso: %.2f \n",listaPessoas[i].peso);
     }
 }
+
+//recursividade: função chama ela mesma;
