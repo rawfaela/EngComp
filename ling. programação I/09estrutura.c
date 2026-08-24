@@ -44,26 +44,40 @@ int main()
         case 1:
             printf("Digite o nome da pessoa: ");
             scanf("%s",listaPessoas[aux].nome);
-            aux++;
+            printf("Digite a idade: ");
+            scanf("%i",&listaPessoas[aux].idade);
+            printf("Digite a altura: ");
+            scanf("%f",&listaPessoas[aux].altura);
+            printf("Digite o peso: ");
+            scanf("%f",&listaPessoas[aux].peso);
 
+            aux++;
         break;
         case 2:
             for (int i = 0; i<aux; i++)
             {
-                printf("nome %i: %s \n",i,listaPessoas[i].nome);
+                printf("\nPessoa %i: \n",i);
+                printf("nome: %s \n",listaPessoas[i].nome);
+                printf("idade: %i \n",listaPessoas[i].idade);
+                printf("altura: %.2f \n",listaPessoas[i].altura);
+                printf("peso: %.2f \n",listaPessoas[i].peso);
             }
         break;
         case 3:
-            printf("Saindo!\n");
+            printf("\nSaindo!\n");
         break;
         default:
             printf("Opção inválida.");
         break;
         }
     }
-    printf("Pessoas cadastradas: \n");
+    printf("----Pessoas cadastradas----");
     for (int i = 0; i<aux; i++)
     {
-        printf("nome %i: %s \n",i,listaPessoas[i].nome);
+        printf("\nPessoa %i: \n",i);
+        printf("nome: %s \n",listaPessoas[i].nome);
+        printf("idade: %i \n",listaPessoas[i].idade);
+        printf("altura: %.2f \n",listaPessoas[i].altura);
+        printf("peso: %.2f \n",listaPessoas[i].peso);
     }
 }
