@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <string.h>
+//#include <string.h>
 
 int main()
 {
@@ -33,7 +33,6 @@ int main()
     //? testes
     struct Pessoa listaPessoas[50];
     int op, aux=0;
-    char nomeaux[50];
 
     while (op != 3)
     {
@@ -44,8 +43,7 @@ int main()
         {
         case 1:
             printf("Digite o nome da pessoa: ");
-            scanf("%s",nomeaux);
-            strcpy(listaPessoas[aux].nome,nomeaux);
+            scanf("%s",listaPessoas[aux].nome);
             aux++;
 
         break;
