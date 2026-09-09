@@ -18,7 +18,7 @@ int main()
 
     //abre arquivo pra escrita
     FILE *pCadastro;
-    pCadastro = fopen("cadastro.txt", "w"); //file open, abre ou cria arquivo no modo de escrita (w) (se ja tem algo escrito, é apagado, pra adicionar infos tem q usar "a") sdfsdfsdfsdfds
+    pCadastro = fopen("cadastro.txt", "w"); //file open, abre ou cria arquivo no modo de escrita (w) (se ja tem algo escrito, é apagado, pra adicionar infos tem q usar "a" (append))
 
     fprintf(pCadastro,"Nome: %s\nIdade: %i",pPessoa->nome,pPessoa->idade); //printa no arquivo (file print), no disco
 
