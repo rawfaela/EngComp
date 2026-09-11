@@ -74,6 +74,28 @@ void AdicionaPessoa(PESSOA *pPessoa)
     }
 }
 
+void PrintTodasPessoas(void)
+{
+    NODO *pAux = pInicio;
+
+    if (pInicio == NULL)
+    {
+        printf("Nenhuma pessoa cadastrada.\n");
+        return;
+    }
+
+    printf("\n--- Pessoas Cadastradas ---\n");
+
+    while (pAux != NULL)
+    {
+        PrintPessoa(pAux->pPessoa);
+
+        printf("---------------------------\n");
+
+        pAux = pAux->pProx;
+    }
+}
+
 void MainMenu()
 {
     int op;
@@ -92,16 +114,8 @@ void MainMenu()
                 AdicionaPessoa(pPessoa);
             break;
             
-            case 2: //so printa a atual
-                if (pAtual == NULL)
-                {
-                    printf("Nenhuma pessoa cadastrada.");
-                }
-                else
-                {
-                    printf("\n--- Pessoas Cadastradas ---\n");
-                    PrintPessoa(pAtual->pPessoa);
-                }
+            case 2: 
+                PrintTodasPessoas();
             break;
             
             case 3:
