@@ -8,7 +8,7 @@ int main()
     printf("float: %d\n",sizeof(float));
     printf("double: %d\n",sizeof(double));
 
-    printf("Quantidade de bits de cada tipo de variável\n");
+    printf("\nQuantidade de bits de cada tipo de variável\n");
     printf("int: %d\n",sizeof(int)*8);
     printf("char: %d\n",sizeof(char)*8);
     printf("float: %d\n",sizeof(float)*8);
