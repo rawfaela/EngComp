@@ -14,3 +14,5 @@ int main()
     printf("float: %d\n",sizeof(float)*8);
     printf("double: %d\n",sizeof(double)*8);
 }
+
+//fseek -> posiciona o ponteiro do arq a uma dist relativa (ao inicio / fim do arquivo, ou posicao atual do arq)
