@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+//! FALTA EXCLUIR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
 typedef struct disco
 {
     int   codigo;
