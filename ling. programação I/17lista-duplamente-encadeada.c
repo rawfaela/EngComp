@@ -2,8 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-//! VER ARQ NO MOODLE, COPIAR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 typedef struct pessoa
 {
     char nome[50];
@@ -29,7 +27,7 @@ void PrintPessoa(void);
 void MainMenu(void);
 void SalvaLista(void);
 void LeLista(void);
-
+void DestroiLista(void);
 
 NODO *CriaPessoa(void) //(void) explicita que ela não recebe parametros, se fosse () os parametros não estão especificados
 {
@@ -61,7 +59,6 @@ void CadastroPessoa(PESSOA *pPessoa)
 
 void PrintPessoa(void)
 { 
-    //ta printando so o ultimo
     printf("\n--- Pessoas Cadastradas ---\n");
     pAtual = pInicio; 
     if (pAtual == NULL)
@@ -96,6 +93,24 @@ void InsereNaLista(NODO *pNodo)
     }
 }
 
+NODO *BuscaPessoa(const char *nome)
+{
+    
+}
+
+void DestroiLista(void)
+{
+    while (pInicio != NULL)
+    {
+        pAtual = pInicio;
+        pInicio = pInicio->pProx;
+        free(pAtual->pPessoa);
+        free(pAtual);   
+    }
+    pFim = NULL;
+    pAtual = NULL;
+}
+
 void MainMenu(void)
 {
     int op;
@@ -128,6 +143,7 @@ void MainMenu(void)
             break;
 
             case 5:
+                DestroiLista();
                 printf("Saindo.\n");
             break;
 
@@ -151,13 +167,38 @@ void SalvaLista(void)
     fclose(pArquivo);
 }
 
-void LeLista(void)
+void LeLista(void) //reconstroi lista do printPessoa se fecha o arq
 {
     FILE *pArquivo;
     NODO *pNodo = NULL;
     PESSOA *pPessoa = NULL;
+    NODO *pAux = NULL;
 
-    pArquivo = fopen("lista.txt", "r+");
+    pArquivo = fopen("lista.txt", "rb");
+
+    if (pArquivo == NULL)
+    {
+        printf("Arquivo nao encontrado.\n");
+        return;
+    }
+
+    //limpa a lista atual
+    pAtual = pInicio;
+
+    while (pAtual != NULL)
+    {
+        pAux = pAtual->pProx;
+
+        free(pAtual->pPessoa);
+        free(pAtual);
+
+        pAtual = pAux;
+    }
+
+    pInicio = NULL;
+    pFim = NULL;
+    pAtual = NULL;
+
     while(1)
     {
         pPessoa = (PESSOA *)malloc(sizeof(PESSOA));
@@ -167,10 +208,13 @@ void LeLista(void)
             free(pPessoa);
             break;
         }
+
         pNodo = CriaNodo();
         pNodo->pPessoa = pPessoa;
+
         InsereNaLista(pNodo);
     }
+
     fclose(pArquivo);
 }
 
