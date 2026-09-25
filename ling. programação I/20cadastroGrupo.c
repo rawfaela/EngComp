@@ -30,7 +30,7 @@ void PrintDisco(void);
 void MainMenu(void);
 void SalvaLista(void);
 void LeLista(void);
-
+void DestroiLista(void);
 
 NODO *CriaDisco(void) //(void) explicita que ela não recebe parametros, se fosse () os parametros não estão especificados
 {
@@ -55,14 +55,14 @@ NODO *CriaNodo(void)
 void CadastroDisco(DISCO *pDisco)
 {
     printf("Digite o título do disco: ");
-    scanf(" %[^\n]", pDisco->titulo);
+    scanf(" %[^\n]", pDisco->titulo); //espaço em branco antes do % ignora todo espaço em branco antes de começar a string
     printf("Digite o artista do disco: ");
-    scanf(" %[^\n]", pDisco->artista);
+    scanf(" %[^\n]", pDisco->artista); //%[^\n]: leia e aceite qualquer caractere, exceto (^) a quebra de linha (\n)
     printf("Digite a gravadora do disco: ");
     scanf(" %[^\n]", pDisco->gravadora);
     printf("Digite o ano de publicação do disco: ");
     scanf("%i",&pDisco->anoPublicacao);
-    printf("Digite a duração do disco: ");
+    printf("Digite a duração do disco (min): ");
     scanf("%f",&pDisco->duracao);
 }
 
@@ -81,7 +81,7 @@ void PrintDisco(void)
         printf("Artista: %s\n",pAtual->pDisco->artista);
         printf("Gravadora: %s\n",pAtual->pDisco->gravadora);
         printf("Ano de publicação: %i\n",pAtual->pDisco->anoPublicacao);
-        printf("Duração: %.2f\n",pAtual->pDisco->duracao);
+        printf("Duração (min): %.2f\n",pAtual->pDisco->duracao);
         printf("-------------\n");
         pAtual = pAtual->pProx;
     }
@@ -105,15 +105,28 @@ void InsereNaLista(NODO *pNodo)
     }
 }
 
+void DestroiLista(void)
+{
+    while (pInicio != NULL)
+    {
+        pAtual = pInicio;
+        pInicio = pInicio->pProx;
+        free(pAtual->pDisco);
+        free(pAtual);   
+    }
+    pFim = NULL;
+    pAtual = NULL;
+}
+
 void MainMenu(void)
 {
     int op;
     NODO *pNodo = NULL;
 
-    while (op != 5)
+    do
     {
         printf("\n==== MENU ====\n");
-        printf("1- Cadastrar pessoa\n2- Imprimir pessoa\n3- Salvar no disco\n4- Ler lista\n5- Sair\nEscolha uma opção: ");
+        printf("1- Cadastrar disco\n2- Imprimir discos\n3- Salvar na memória local\n4- Ler lista\n5- Sair\nEscolha uma opção: ");
         scanf("%i",&op);
 
         switch (op)
@@ -130,13 +143,16 @@ void MainMenu(void)
             
             case 3:
                 SalvaLista();
+                printf("Salvo na memória local com sucesso!\n");
             break;
 
             case 4:
                 LeLista();
+                printf("Lista lida com sucesso, ecolha a opção 2 para ver registros.\n");
             break;
 
             case 5:
+                DestroiLista();
                 printf("Saindo.\n");
             break;
 
@@ -144,7 +160,7 @@ void MainMenu(void)
                 printf("Opção inválida.\n");
             break;
         }
-    }
+    } while (op != 5);
 }
 
 void SalvaLista(void)
@@ -167,7 +183,7 @@ void LeLista(void) //reconstroi lista do printPessoa se fecha o arq
     DISCO *pDisco = NULL;
     NODO *pAux = NULL;
 
-    pArquivo = fopen("lista.txt", "rb");
+    pArquivo = fopen("lista.txt", "r+");
 
     if (pArquivo == NULL)
     {
