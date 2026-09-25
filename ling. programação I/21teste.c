@@ -39,8 +39,9 @@ void MainMenu(void);
 void SalvaLista(void);
 void LeLista(void);
 void DestroiLista(void);
-void BuscaDisco(void);
+void BuscaDisco(int op);
 void EditaDisco(DISCO *pDisco);
+void Minusculo(char *texto);
 
 int codAux = 0;
 
@@ -50,7 +51,7 @@ NODO *CriaDisco(void)
     pDisco = (DISCO *)malloc(sizeof(DISCO));
     
     NODO *pNodo;
-    pNodo = CriaNodo();
+    pNodo         = CriaNodo();
     pNodo->pDisco = pDisco;
 
     return(pNodo); 
@@ -59,14 +60,18 @@ NODO *CriaDisco(void)
 NODO *CriaNodo(void)
 {
     NODO *pNodo;
-    pNodo = (NODO *)malloc(sizeof(NODO));
+
+    pNodo        = (NODO *)malloc(sizeof(NODO));
+    pNodo->pProx = NULL;
+    pNodo->pPrev = NULL;
 
     return(pNodo);
 }
 
 void CadastroDisco(DISCO *pDisco)
 {
-    pDisco->codigo = codAux + 1;
+    codAux++;
+    pDisco->codigo = codAux;
 
     printf("Digite o título do disco: ");
     scanf(" %[^\n]", pDisco->titulo); 
@@ -75,13 +80,13 @@ void CadastroDisco(DISCO *pDisco)
     printf("Digite a gravadora do disco: ");
     scanf(" %[^\n]", pDisco->gravadora);
     printf("Digite o ano de publicação do disco: ");
-    scanf("%i",&pDisco->anoPublicacao);
+    scanf("%i", &pDisco->anoPublicacao);
     printf("Digite a duração do disco (min): ");
-    scanf("%f",&pDisco->duracao);
+    scanf("%f", &pDisco->duracao);
 }
 
 
-void BuscaDisco(void)
+void BuscaDisco(int op)
 {
     if (pInicio == NULL)
     {
@@ -89,26 +94,31 @@ void BuscaDisco(void)
         return;
     }
 
-    int op;
-    int auxPos = 0;
+    RESULTADO *bufferDiscos = (RESULTADO *)malloc(pFim->pDisco->codigo * sizeof(RESULTADO)); //!! so funciona se não excluir
     char pesquisa[100];
-    pAtual = pInicio;
-    RESULTADO *bufferDiscos = (RESULTADO *)malloc(pFim->pDisco->codigo * sizeof(RESULTADO));
+    int  opPesq;
+    int  auxPos = 0;
+    pAtual      = pInicio;
 
     do
     {
         printf("Deseja pesquisar por\n1- Título\n2- Artista\nDigite sua opção: ");
-        scanf("%i",&op);
-        switch (op)
+        scanf("%i",&opPesq);
+
+        switch (opPesq)
         {
         case 1:
-            
             printf("Digite o nome do disco para buscar: ");
             scanf(" %[^\n]", pesquisa);
+            Minusculo(pesquisa);
 
             while(pAtual != NULL)
             {
-                if (strcmp(pAtual->pDisco->titulo, pesquisa) == 0) //tolower aq nao funciona pq so recebe um char por vez (fazer loop p trocar)
+                char titulo[100];
+                strcpy(titulo, pAtual->pDisco->titulo);
+                Minusculo(titulo);
+
+                if (strstr(titulo, pesquisa) != NULL) //tolower aq nao funciona pq so recebe um char por vez (fazer loop p trocar)
                 {
                     bufferDiscos[auxPos].disco = *pAtual->pDisco;
                     bufferDiscos[auxPos].pNodo = pAtual;
@@ -121,10 +131,15 @@ void BuscaDisco(void)
         case 2:
             printf("Digite o nome do artista para buscar: ");
             scanf(" %[^\n]", pesquisa);
+            Minusculo(pesquisa);
 
             while(pAtual != NULL)
             {
-                if (strcmp(pAtual->pDisco->artista, pesquisa) == 0) //tolower aq nao funciona pq so recebe um char por vez (fazer loop p trocar)
+                char artista[100];
+                strcpy(artista, pAtual->pDisco->titulo);
+                Minusculo(artista);
+
+                if (strstr(artista, pesquisa) != NULL) //tolower aq nao funciona pq so recebe um char por vez (fazer loop p trocar)
                 {
                     bufferDiscos[auxPos].disco = *pAtual->pDisco;
                     bufferDiscos[auxPos].pNodo = pAtual;
@@ -138,7 +153,7 @@ void BuscaDisco(void)
             printf("Opção inválida.\n\n");
         break;
         }
-    } while(op != 1 && op!=2);
+    } while(opPesq != 1 && opPesq!=2);
 
     
     if (auxPos > 0)
@@ -146,13 +161,13 @@ void BuscaDisco(void)
         printf("Discos encontrados com sucesso!\n");
         for (int i = 0; i < auxPos; i++)
         {
+            printf("-------------\n");
             printf("Código: %i\n",bufferDiscos[i].disco.codigo);
             printf("Título: %s\n",bufferDiscos[i].disco.titulo);
             printf("Artista: %s\n",bufferDiscos[i].disco.artista);
             printf("Gravadora: %s\n",bufferDiscos[i].disco.gravadora);
             printf("Ano de publicação: %i\n",bufferDiscos[i].disco.anoPublicacao);
             printf("Duração (min): %.2f\n",bufferDiscos[i].disco.duracao);
-            printf("-------------\n");
         }
     }
     else
@@ -160,24 +175,35 @@ void BuscaDisco(void)
         printf("Disco não encontrado.\n");
     }
 
-    AlteraDisco(bufferDiscos, auxPos);
+    if (op == 2)
+    {
+        AlteraDisco(bufferDiscos, auxPos);
+    }
+
     free(bufferDiscos);
 }
 
 void AlteraDisco(RESULTADO *bufferDiscos, int auxPos)
 {
     int auxCod;
+
     if (auxPos > 0)
     {
         printf("Digite o código do disco para alterar: ");
         scanf("%i", &auxCod);
+
         for (int i = 0; i<auxPos; i++)
         {
             if (auxCod == bufferDiscos[i].disco.codigo)
             {
                 printf("Insira os novos dados:\n");
                 EditaDisco(bufferDiscos[i].pNodo->pDisco);
+
                 printf("Disco alterado com sucesso!\n");
+            }
+            else
+            {
+                printf("Disco não encontrado.\n");
             }
         }
     }
@@ -232,20 +258,22 @@ void PrintDisco(void)
 { 
     printf("\n--- Discos Cadastrados ---\n");
     pAtual = pInicio; 
+
     if (pAtual == NULL)
     {
         printf("Nenhum disco cadastrado.\n");
         return;
     }
+
     while(pAtual != NULL)
     {
+        printf("-------------\n");
         printf("Código: %i\n",pAtual->pDisco->codigo);
         printf("Título: %s\n",pAtual->pDisco->titulo);
         printf("Artista: %s\n",pAtual->pDisco->artista);
         printf("Gravadora: %s\n",pAtual->pDisco->gravadora);
         printf("Ano de publicação: %i\n",pAtual->pDisco->anoPublicacao);
         printf("Duração (min): %.2f\n",pAtual->pDisco->duracao);
-        printf("-------------\n");
         pAtual = pAtual->pProx;
     }
 }
@@ -272,12 +300,13 @@ void DestroiLista(void)
 {
     while (pInicio != NULL)
     {
-        pAtual = pInicio;
+        pAtual  = pInicio;
         pInicio = pInicio->pProx;
+
         free(pAtual->pDisco);
         free(pAtual);   
     }
-    pFim = NULL;
+    pFim   = NULL;
     pAtual = NULL;
 }
 
@@ -289,7 +318,7 @@ void MainMenu(void)
     do
     {
         printf("\n==== MENU ====\n");
-        printf("1- Cadastrar disco\n2- Alterar disco\n3- Imprimir discos\n4- Salvar na memória local\n5- Ler lista\n6- Sair\nEscolha uma opção: ");
+        printf("1- Cadastrar disco\n2- Alterar disco\n3- Imprimir discos\n4- Buscar discos\n5- Salvar na memória local\n6- Ler lista\n7- Sair\nEscolha uma opção: ");
         scanf("%i",&op);
 
         switch (op)
@@ -301,7 +330,7 @@ void MainMenu(void)
             break;
             
             case 2:
-                BuscaDisco();
+                BuscaDisco(op);
             break;
 
             case 3: 
@@ -309,16 +338,21 @@ void MainMenu(void)
             break;
             
             case 4:
+                BuscaDisco(op);
+            break;
+
+            case 5:
                 SalvaLista();
                 printf("Salvo na memória local com sucesso!\n");
             break;
 
-            case 5:
+            case 6:
                 LeLista();
                 printf("Lista lida com sucesso, ecolha a opção 3 para ver registros.\n");
             break;
 
-            case 6:
+            case 7:
+                DestroiLista();
                 printf("Saindo.\n");
             break;
 
@@ -326,14 +360,22 @@ void MainMenu(void)
                 printf("Opção inválida.\n");
             break;
         }
-    } while (op != 6);
+    } while (op != 7);
 }
 
 void SalvaLista(void)
 {
     FILE *pArquivo;
     pArquivo = fopen("lista.txt", "w+");
+
+    if (pArquivo == NULL)
+    {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
     pAtual = pInicio;
+
     while(pAtual != NULL)
     {
         fwrite(pAtual->pDisco, sizeof(DISCO), 1, pArquivo);
@@ -344,10 +386,10 @@ void SalvaLista(void)
 
 void LeLista(void)
 {
-    FILE *pArquivo;
-    NODO *pNodo = NULL;
+    FILE  *pArquivo;
+    NODO  *pNodo  = NULL;
     DISCO *pDisco = NULL;
-    NODO *pAux = NULL;
+    NODO  *pAux   = NULL;
 
     pArquivo = fopen("lista.txt", "r+");
 
@@ -371,8 +413,8 @@ void LeLista(void)
     }
 
     pInicio = NULL;
-    pFim = NULL;
-    pAtual = NULL;
+    pFim    = NULL;
+    pAtual  = NULL;
 
     while(1)
     {
@@ -384,13 +426,28 @@ void LeLista(void)
             break;
         }
 
-        pNodo = CriaNodo();
+        if(pDisco->codigo > codAux)
+        {
+            codAux = pDisco->codigo;
+        }
+
+        pNodo         = CriaNodo();
         pNodo->pDisco = pDisco;
 
         InsereNaLista(pNodo);
     }
 
     fclose(pArquivo);
+}
+
+void Minusculo(char *texto)
+{
+    int i;
+
+    for(i = 0; texto[i] != '\0'; i++)
+    {
+        texto[i] = tolower(texto[i]);
+    }
 }
 
 int main()
