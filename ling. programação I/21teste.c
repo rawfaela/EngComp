@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-//! FALTA EXCLUIR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-
 typedef struct disco
 {
     int   codigo;
@@ -43,6 +41,7 @@ void LeLista(void);
 void DestroiLista(void);
 void BuscaDisco(int op);
 void EditaDisco(DISCO *pDisco);
+void ExcluiDisco(RESULTADO *bufferDiscos, int auxPos);
 void Minusculo(char *texto);
 
 int codAux = 0;
@@ -96,7 +95,15 @@ void BuscaDisco(int op)
         return;
     }
 
-    RESULTADO *bufferDiscos = (RESULTADO *)malloc(pFim->pDisco->codigo * sizeof(RESULTADO)); //!! so funciona se não excluir
+    int quantidade = 0;
+	NODO *pCont = pInicio;
+	while (pCont != NULL)
+	{
+		quantidade++;
+		pCont = pCont->pProx;
+	}
+	RESULTADO *bufferDiscos = malloc(quantidade * sizeof(RESULTADO));
+
     char pesquisa[100];
     int  opPesq;
     int  auxPos = 0;
@@ -120,7 +127,7 @@ void BuscaDisco(int op)
                 strcpy(titulo, pAtual->pDisco->titulo);
                 Minusculo(titulo);
 
-                if (strstr(titulo, pesquisa) != NULL) //tolower aq nao funciona pq so recebe um char por vez (fazer loop p trocar)
+                if (strstr(titulo, pesquisa) != NULL)
                 {
                     bufferDiscos[auxPos].disco = *pAtual->pDisco;
                     bufferDiscos[auxPos].pNodo = pAtual;
@@ -138,10 +145,10 @@ void BuscaDisco(int op)
             while(pAtual != NULL)
             {
                 char artista[100];
-                strcpy(artista, pAtual->pDisco->titulo);
+                strcpy(artista, pAtual->pDisco->artista);
                 Minusculo(artista);
 
-                if (strstr(artista, pesquisa) != NULL) //tolower aq nao funciona pq so recebe um char por vez (fazer loop p trocar)
+                if (strstr(artista, pesquisa) != NULL)
                 {
                     bufferDiscos[auxPos].disco = *pAtual->pDisco;
                     bufferDiscos[auxPos].pNodo = pAtual;
@@ -177,10 +184,19 @@ void BuscaDisco(int op)
         printf("Disco não encontrado.\n");
     }
 
-    if (op == 2)
-    {
-        AlteraDisco(bufferDiscos, auxPos);
-    }
+	switch (op)
+	{
+		case 2:
+			AlteraDisco(bufferDiscos, auxPos);
+		break;
+		
+		case 5:
+			ExcluiDisco(bufferDiscos, auxPos);
+		break;
+		
+		default:
+		break;
+	}
 
     free(bufferDiscos);
 }
@@ -256,6 +272,61 @@ void EditaDisco(DISCO *pDisco)
     }
 }
 
+void ExcluiDisco(RESULTADO *bufferDiscos, int auxPos)
+{
+    int auxCod;
+    int encontrado = 0;
+
+    if (auxPos > 0)
+    {
+        printf("Digite o código do disco para excluir: ");
+        scanf("%i", &auxCod);
+
+        for (int i = 0; i < auxPos; i++)
+        {
+            if (auxCod == bufferDiscos[i].disco.codigo)
+            {
+                NODO *pAux = bufferDiscos[i].pNodo;
+
+                if (pAux->pPrev != NULL)
+                {
+                    pAux->pPrev->pProx = pAux->pProx;
+                }
+                else
+                {
+                    pInicio = pAux->pProx;
+                }
+
+                if (pAux->pProx != NULL)
+                {
+                    pAux->pProx->pPrev = pAux->pPrev;
+                }
+                else
+                {
+                    pFim = pAux->pPrev;
+                }
+
+                free(pAux->pDisco);
+                free(pAux);
+
+                printf("Disco excluído com sucesso!\n");
+
+                encontrado = 1;
+                break;
+            }
+        }
+
+        if (encontrado == 0)
+        {
+            printf("Código não encontrado nos resultados da busca.\n");
+        }
+    }
+    else
+    {
+        printf("Nenhum disco encontrado para excluir.\n");
+    }
+}
+
 void PrintDisco(void)
 { 
     printf("\n--- Discos Cadastrados ---\n");
@@ -320,7 +391,7 @@ void MainMenu(void)
     do
     {
         printf("\n==== MENU ====\n");
-        printf("1- Cadastrar disco\n2- Alterar disco\n3- Imprimir discos\n4- Buscar discos\n5- Salvar na memória local\n6- Ler lista\n7- Sair\nEscolha uma opção: ");
+        printf("1- Cadastrar disco\n2- Alterar disco\n3- Imprimir discos\n4- Buscar discos\n5- Excluir disco\n6- Salvar na memória local\n7- Ler lista\n8- Sair\nEscolha uma opção: ");
         scanf("%i",&op);
 
         switch (op)
@@ -343,17 +414,21 @@ void MainMenu(void)
                 BuscaDisco(op);
             break;
 
-            case 5:
+			case 5:
+				BuscaDisco(op);
+			break;
+
+            case 6:
                 SalvaLista();
                 printf("Salvo na memória local com sucesso!\n");
             break;
 
-            case 6:
+            case 7:
                 LeLista();
                 printf("Lista lida com sucesso, ecolha a opção 3 para ver registros.\n");
             break;
 
-            case 7:
+            case 8:
                 DestroiLista();
                 printf("Saindo.\n");
             break;
@@ -362,7 +437,7 @@ void MainMenu(void)
                 printf("Opção inválida.\n");
             break;
         }
-    } while (op != 7);
+    } while (op != 8);
 }
 
 void SalvaLista(void)
