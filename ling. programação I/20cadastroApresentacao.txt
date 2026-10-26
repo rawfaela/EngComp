@@ -1,0 +1,759 @@
+Vou explicar linha por linha somente as funções marcadas com `//! falar`, usando uma linguagem simples, como se fosse para apresentar o trabalho ao professor.
+
+Antes, entenda três conceitos que aparecem nessas funções:
+
+- `NODO`: um elemento da lista encadeada que guarda os ponteiros para o próximo nó, o anterior e o disco.
+- `DISCO`: a estrutura que guarda os dados de um disco, como título, artista e ano.
+- `RESULTADO`: guarda uma cópia dos dados do disco encontrado e um ponteiro para o nó original na lista.
+
+O símbolo `->` serve para acessar um campo de uma estrutura por meio de um ponteiro. Por exemplo, `pAtual->pProx` acessa o próximo nó da lista.
+
+## 1. Função `BuscaDisco(int op)`
+
+Essa função pesquisa discos pelo título ou pelo artista. Dependendo da opção recebida, também permite alterar ou excluir um disco.
+
+### Parte 1 — Verificar se existem discos
+
+c
+
+```
+void BuscaDisco(int op)
+{
+    if (pInicio == NULL)
+    {
+        printf("Nenhum disco cadastrado.\n");
+        return;
+    }
+```
+
+- `void BuscaDisco(int op)`: declara uma função que não retorna nenhum valor e recebe um número inteiro chamado `op`.
+- `if (pInicio == NULL)`: verifica se o início da lista está vazio. Se estiver, não há discos cadastrados.
+- `printf(...)`: mostra uma mensagem ao usuário.
+- `return;`: encerra a função imediatamente, porque não há discos para pesquisar.
+
+Em resumo: não adianta pesquisar se a lista estiver vazia.
+
+### Parte 2 — Contar os discos cadastrados
+
+c
+
+```
+int quantidade = 0;
+NODO *pCont = pInicio;
+
+while (pCont != NULL)
+{
+    quantidade++;
+    pCont = pCont->pProx;
+}
+```
+
+- `int quantidade = 0;`: cria uma variável para contar quantos discos existem.
+- `NODO *pCont = pInicio;`: cria um ponteiro auxiliar que começa no primeiro nó.
+- `while (pCont != NULL)`: percorre a lista até chegar ao final.
+- `quantidade++;`: aumenta a contagem em 1 para cada nó encontrado.
+- `pCont = pCont->pProx;`: avança para o próximo nó.
+
+Imagine que existem três discos: a variável `quantidade` terminará com o valor `3`.
+
+### Parte 3 — Criar o espaço para os resultados
+
+c
+
+```
+RESULTADO *bufferDiscos =
+    malloc(quantidade * sizeof(RESULTADO));
+```
+
+- `RESULTADO *bufferDiscos`: declara um ponteiro para armazenar os resultados da pesquisa.
+- `malloc(...)`: reserva memória dinamicamente.
+- `sizeof(RESULTADO)`: calcula o tamanho necessário para guardar um resultado.
+- `quantidade * sizeof(RESULTADO)`: reserva espaço para até tantos resultados quanto discos cadastrados.
+
+Por exemplo, se existem 10 discos, o programa reserva espaço para até 10 resultados, mesmo que a pesquisa encontre apenas 2.
+
+A função `malloc` retorna o endereço da memória reservada. Aqui, o programa não verifica se essa reserva falhou, algo que seria recomendável fazer.
+
+### Parte 4 — Preparar as variáveis da pesquisa
+
+c
+
+```
+char pesquisa[100];
+int opPesq;
+int auxPos = 0;
+pAtual = pInicio;
+```
+
+- `char pesquisa[100];`: guarda o texto digitado pelo usuário.
+- `int opPesq;`: guarda o tipo de pesquisa escolhido: título ou artista.
+- `int auxPos = 0;`: conta quantos resultados foram encontrados e indica a próxima posição livre do buffer.
+- `pAtual = pInicio;`: posiciona o ponteiro no primeiro nó da lista.
+
+### Parte 5 — Perguntar o tipo de pesquisa
+
+c
+
+```
+do
+{
+    printf("Deseja pesquisar por\n1- Título\n2- Artista\nDigite sua opção: ");
+    scanf("%i", &opPesq);
+```
+
+- `do { ... } while (...)`: executa o bloco pelo menos uma vez e pode repeti-lo.
+- `printf(...)`: mostra as opções de pesquisa.
+- `scanf("%i", &opPesq)`: lê a opção digitada e armazena o número em `opPesq`.
+- `&opPesq`: fornece o endereço da variável para que `scanf` possa alterar seu valor.
+
+### Parte 6 — Pesquisar pelo título
+
+c
+
+```
+switch (opPesq)
+{
+case 1:
+    printf("Digite o nome do disco para buscar: ");
+    scanf(" %[^\n]", pesquisa);
+    Minusculo(pesquisa);
+```
+
+- `switch (opPesq)`: escolhe o bloco que será executado conforme a opção.
+- `case 1`: executa a pesquisa por título.
+- `scanf(" %[^\n]", pesquisa)`: lê o título digitado, incluindo espaços, até o usuário pressionar Enter.
+- `Minusculo(pesquisa)`: converte o texto pesquisado para letras minúsculas.
+
+O espaço antes de `%[^\n]` faz o `scanf` ignorar espaços e quebras de linha pendentes da leitura anterior.
+
+Agora, o programa percorre a lista:
+
+c
+
+```
+while (pAtual != NULL)
+{
+    char titulo[100];
+    strcpy(titulo, pAtual->pDisco->titulo);
+    Minusculo(titulo);
+```
+
+- `while (pAtual != NULL)`: continua enquanto houver um nó.
+- `char titulo[100]`: cria uma cópia temporária para o título.
+- `strcpy(titulo, pAtual->pDisco->titulo)`: copia o título do disco atual para essa variável.
+- `Minusculo(titulo)`: converte a cópia para minúsculas.
+
+Por que usar uma cópia? Porque o programa quer ignorar diferenças entre maiúsculas e minúsculas durante a pesquisa sem modificar o título original do disco.
+
+Veja a comparação:
+
+c
+
+```
+if (strstr(titulo, pesquisa) != NULL)
+{
+    bufferDiscos[auxPos].disco = *pAtual->pDisco;
+    bufferDiscos[auxPos].pNodo = pAtual;
+    auxPos++;
+}
+pAtual = pAtual->pProx;
+```
+
+- `strstr(titulo, pesquisa)`: procura o texto pesquisado dentro do título.
+- `!= NULL`: significa que o texto foi encontrado.
+- `bufferDiscos[auxPos].disco = *pAtual->pDisco`: copia os dados do disco encontrado para o buffer. O `*` acessa a estrutura apontada pelo ponteiro.
+- `bufferDiscos[auxPos].pNodo = pAtual`: guarda o endereço do nó original.
+- `auxPos++`: aumenta a quantidade de resultados encontrados.
+- `pAtual = pAtual->pProx`: avança para o próximo disco.
+
+Por exemplo, se o usuário pesquisar `rock`, o programa poderá encontrar títulos como `Rock Nacional` e `Classic Rock`.
+
+### Parte 7 — Pesquisar pelo artista
+
+c
+
+```
+case 2:
+    printf("Digite o nome do artista para buscar: ");
+    scanf(" %[^\n]", pesquisa);
+    Minusculo(pesquisa);
+```
+
+Essa parte funciona quase igual à pesquisa por título, mas o campo pesquisado é o artista.
+
+c
+
+```
+while (pAtual != NULL)
+{
+    char artista[100];
+    strcpy(artista, pAtual->pDisco->artista);
+    Minusculo(artista);
+
+    if (strstr(artista, pesquisa) != NULL)
+    {
+        bufferDiscos[auxPos].disco = *pAtual->pDisco;
+        bufferDiscos[auxPos].pNodo = pAtual;
+        auxPos++;
+    }
+    pAtual = pAtual->pProx;
+}
+break;
+```
+
+- Cria uma cópia do nome do artista.
+- Converte a cópia para minúsculas.
+- Verifica se o texto pesquisado aparece no nome.
+- Se encontrar, salva o disco e o endereço do nó no buffer.
+- Avança para o próximo nó.
+- `break`: encerra o `case 2`.
+
+O `default` trata uma opção inválida:
+
+c
+
+```
+default:
+    printf("Opção inválida.\n\n");
+    break;
+```
+
+Se o usuário digitar uma opção diferente de 1 ou 2, aparece uma mensagem de erro.
+
+c
+
+```
+} while (opPesq != 1 && opPesq != 2);
+```
+
+Repete a pergunta enquanto a opção não for 1 nem 2.
+
+### Parte 8 — Mostrar os discos encontrados
+
+c
+
+```
+if (auxPos > 0)
+{
+    printf("Discos encontrados com sucesso!\n");
+
+    for (int i = 0; i < auxPos; i++)
+    {
+        printf("-------------\n");
+        printf("Código: %i\n", bufferDiscos[i].disco.codigo);
+        printf("Título: %s\n", bufferDiscos[i].disco.titulo);
+        printf("Artista: %s\n", bufferDiscos[i].disco.artista);
+        printf("Gravadora: %s\n", bufferDiscos[i].disco.gravadora);
+        printf("Ano de publicação: %i\n", bufferDiscos[i].disco.anoPublicacao);
+        printf("Duração (min): %.2f\n", bufferDiscos[i].disco.duracao);
+    }
+}
+else
+{
+    printf("Disco não encontrado.\n");
+}
+```
+
+- `if (auxPos > 0)`: verifica se pelo menos um disco foi encontrado.
+- `for`: percorre todos os resultados encontrados.
+- `bufferDiscos[i]`: acessa o resultado da posição `i`.
+- `.disco.codigo`, `.disco.titulo` etc.: acessam os campos da cópia do disco.
+- `%i`: exibe um número inteiro.
+- `%s`: exibe uma string.
+- `%.2f`: exibe um número decimal com duas casas após a vírgula decimal, usando ponto na saída padrão de C.
+- `else`: se nenhum resultado foi encontrado, mostra uma mensagem.
+
+### Parte 9 — Decidir se vai alterar ou excluir
+
+c
+
+```
+switch (op)
+{
+    case 2:
+        AlteraDisco(bufferDiscos, auxPos);
+        break;
+
+    case 5:
+        ExcluiDisco(bufferDiscos, auxPos);
+        break;
+
+    default:
+        break;
+}
+
+free(bufferDiscos);
+```
+
+Essa parte é importante para entender como o menu funciona.
+
+- `switch (op)`: verifica a opção original do menu principal.
+- `case 2`: chama `AlteraDisco` para permitir a alteração.
+- `case 5`: chama `ExcluiDisco` para permitir a exclusão.
+- `default`: não faz nada nos outros casos.
+- `free(bufferDiscos)`: libera a memória que foi reservada com `malloc`.
+
+Atenção: no menu, a opção 4 chama `BuscaDisco(4)`, então apenas pesquisa. A opção 2 chama `BuscaDisco(2)`, que pesquisa e depois permite alterar. A opção 5 chama `BuscaDisco(5)`, que pesquisa e depois permite excluir.
+
+## 2. Função `AlteraDisco(RESULTADO *bufferDiscos, int auxPos)`
+
+Essa função permite alterar os dados de um disco que apareceu nos resultados da pesquisa.
+
+c
+
+```
+void AlteraDisco(RESULTADO *bufferDiscos, int auxPos)
+{
+    int auxCod;
+```
+
+- `void`: significa que a função não retorna um valor.
+- `RESULTADO *bufferDiscos`: recebe o endereço do buffer com os discos encontrados.
+- `int auxPos`: recebe a quantidade de resultados encontrados.
+- `int auxCod`: guarda o código do disco que o usuário deseja alterar.
+
+c
+
+```
+if (auxPos > 0)
+{
+    printf("Digite o código do disco para alterar: ");
+    scanf("%i", &auxCod);
+```
+
+- `if (auxPos > 0)`: verifica se a pesquisa encontrou algum disco.
+- `printf`: pede o código do disco.
+- `scanf`: lê o código digitado e o armazena em `auxCod`.
+
+c
+
+```
+for (int i = 0; i < auxPos; i++)
+{
+    if (auxCod == bufferDiscos[i].disco.codigo)
+```
+
+- `for`: percorre todos os resultados da pesquisa.
+- `i = 0`: começa pelo primeiro resultado.
+- `i < auxPos`: continua até verificar todos os resultados.
+- `i++`: passa para a próxima posição.
+- `if (auxCod == ...)`: compara o código digitado com o código de cada disco encontrado.
+
+Se os códigos forem iguais, executa:
+
+c
+
+```
+{
+    printf("Insira os novos dados:\n");
+    EditaDisco(bufferDiscos[i].pNodo->pDisco);
+
+    printf("Disco alterado com sucesso!\n");
+}
+```
+
+- `printf`: informa que o usuário pode inserir os novos dados.
+- `bufferDiscos[i].pNodo`: acessa o ponteiro para o nó original do disco.
+- `->pDisco`: acessa o disco guardado nesse nó.
+- `EditaDisco(...)`: chama a função responsável por perguntar quais campos serão modificados.
+- A última mensagem informa que a alteração foi realizada.
+
+Por que usar `bufferDiscos[i].pNodo->pDisco`?
+
+Porque o buffer contém uma cópia dos dados para exibição e, além disso, guarda o endereço do disco original. Para modificar a lista de verdade, o programa acessa o disco original.
+
+c
+
+```
+else
+{
+    printf("Disco não encontrado.\n");
+}
+```
+
+Esse `else` é executado sempre que o código digitado não corresponde ao código da posição atual.
+
+Atenção a um detalhe: do jeito que está, a mensagem de disco não encontrado pode aparecer várias vezes durante o `for`, mesmo que o disco esteja em outra posição. O ideal seria usar uma variável para controlar se o código foi encontrado, como a função de exclusão faz.
+
+## 3. Função `EditaDisco(DISCO *pDisco)`
+
+Essa função pergunta individualmente se o usuário deseja alterar cada campo do disco.
+
+### Parte 1 — Receber o disco e declarar as variáveis
+
+c
+
+```
+void EditaDisco(DISCO *pDisco)
+{
+    char titulo, artista, gravadora, ano, duracao;
+```
+
+- `DISCO *pDisco`: recebe o endereço do disco que será editado.
+- `char titulo`: guarda a resposta sobre alterar o título.
+- `char artista`: guarda a resposta sobre alterar o artista.
+- `char gravadora`: guarda a resposta sobre alterar a gravadora.
+- `char ano`: guarda a resposta sobre alterar o ano.
+- `char duracao`: guarda a resposta sobre alterar a duração.
+
+Cada variável `char` armazena um caractere, como `'S'` ou `'N'`.
+
+### Parte 2 — Alterar o título
+
+c
+
+```
+printf("Deseja alterar o título? (S/N)\n");
+scanf(" %c", &titulo);
+```
+
+- `printf`: pergunta se o usuário deseja alterar o título.
+- `scanf(" %c", &titulo)`: lê um único caractere e guarda a resposta em `titulo`.
+- O espaço antes de `%c` ignora espaços em branco e quebras de linha pendentes.
+
+c
+
+```
+if (toupper(titulo) == 'S')
+{
+    printf("Digite o novo título do disco: ");
+    scanf(" %[^\n]", pDisco->titulo);
+}
+```
+
+- `toupper(titulo)`: converte a resposta para maiúscula.
+- `== 'S'`: verifica se a resposta é `S`, aceitando também `s`.
+- `scanf(" %[^\n]", pDisco->titulo)`: lê o novo título, incluindo espaços, e grava diretamente no disco original.
+
+Se o usuário responder `N`, o programa não altera o título.
+
+### Parte 3 — Alterar o artista
+
+c
+
+```
+printf("Deseja alterar o artista? (S/N)\n");
+scanf(" %c", &artista);
+
+if (toupper(artista) == 'S')
+{
+    printf("Digite o novo artista do disco: ");
+    scanf(" %[^\n]", pDisco->artista);
+}
+```
+
+O funcionamento é igual ao do título:
+
+- Pergunta se deseja alterar o artista.
+- Lê a resposta.
+- Converte a resposta para maiúscula.
+- Se for `S`, lê o novo nome e salva em `pDisco->artista`.
+
+### Parte 4 — Alterar a gravadora
+
+c
+
+```
+printf("Deseja alterar a gravadora? (S/N)\n");
+scanf(" %c", &gravadora);
+
+if (toupper(gravadora) == 'S')
+{
+    printf("Digite a nova gravadora do disco: ");
+    scanf(" %[^\n]", pDisco->gravadora);
+}
+```
+
+Pergunta se a gravadora será alterada. Se a resposta for `S`, lê o novo nome e substitui o valor de `pDisco->gravadora`.
+
+### Parte 5 — Alterar o ano de publicação
+
+c
+
+```
+printf("Deseja alterar o ano de publicação? (S/N)\n");
+scanf(" %c", &ano);
+
+if (toupper(ano) == 'S')
+{
+    printf("Digite o novo ano de publicação do disco: ");
+    scanf("%i", &pDisco->anoPublicacao);
+}
+```
+
+- Pergunta se deseja alterar o ano.
+- Lê a resposta.
+- Se for `S`, solicita o novo ano.
+- `%i` lê um número inteiro.
+- `&pDisco->anoPublicacao` indica o endereço do campo em que o novo valor será armazenado.
+
+### Parte 6 — Alterar a duração
+
+c
+
+```
+printf("Deseja alterar a duração? (S/N)\n");
+scanf(" %c", &duracao);
+
+if (toupper(duracao) == 'S')
+{
+    printf("Digite a nova duração do disco (min): ");
+    scanf("%f", &pDisco->duracao);
+}
+```
+
+- Pergunta se deseja alterar a duração.
+- Se a resposta for `S`, solicita o novo valor.
+- `%f` lê um número do tipo `float`.
+- `&pDisco->duracao` indica onde guardar a nova duração.
+
+Por exemplo, o usuário pode informar `42.5` minutos.
+
+Resumo da função: ela não cria outro disco. Ela modifica os campos do disco existente, alterando apenas aqueles para os quais o usuário respondeu `S`.
+
+## 4. Função `ExcluiDisco(RESULTADO *bufferDiscos, int auxPos)`
+
+Essa função exclui da lista um disco selecionado pelos resultados da pesquisa.
+
+### Parte 1 — Declarar as variáveis
+
+c
+
+```
+void ExcluiDisco(RESULTADO *bufferDiscos, int auxPos)
+{
+    int auxCod;
+    int encontrado = 0;
+```
+
+- `bufferDiscos`: recebe os resultados encontrados pela pesquisa.
+- `auxPos`: informa quantos resultados existem.
+- `auxCod`: guarda o código do disco que será excluído.
+- `encontrado = 0`: indica inicialmente que o código ainda não foi encontrado.
+- O valor `0` significa falso; depois, o programa muda para `1` quando encontra o disco.
+
+### Parte 2 — Pedir o código do disco
+
+c
+
+```
+if (auxPos > 0)
+{
+    printf("Digite o código do disco para excluir: ");
+    scanf("%i", &auxCod);
+```
+
+- `if (auxPos > 0)`: verifica se a pesquisa encontrou algum disco.
+- `printf`: pede o código do disco a excluir.
+- `scanf`: lê o código informado.
+
+### Parte 3 — Procurar o código nos resultados
+
+c
+
+```
+for (int i = 0; i < auxPos; i++)
+{
+    if (auxCod == bufferDiscos[i].disco.codigo)
+    {
+        NODO *pAux = bufferDiscos[i].pNodo;
+```
+
+- `for`: percorre os resultados da pesquisa.
+- `if`: compara o código digitado com o código do resultado atual.
+- `NODO *pAux`: cria um ponteiro auxiliar para o nó que será excluído.
+- `bufferDiscos[i].pNodo`: fornece o endereço do nó original na lista.
+
+O ponteiro `pAux` é importante porque a exclusão precisa ajustar os nós vizinhos antes de liberar a memória.
+
+### Parte 4 — Ajustar o nó anterior
+
+c
+
+```
+if (pAux->pPrev != NULL)
+{
+    pAux->pPrev->pProx = pAux->pProx;
+}
+else
+{
+    pInicio = pAux->pProx;
+}
+```
+
+Aqui começa a manipulação da lista duplamente encadeada.
+
+- `pAux->pPrev`: aponta para o nó anterior.
+- `if (pAux->pPrev != NULL)`: verifica se existe um nó anterior.
+- `pAux->pPrev->pProx = pAux->pProx`: faz o nó anterior apontar diretamente para o próximo nó, pulando o nó que será excluído.
+- `else`: acontece quando não existe nó anterior, ou seja, o disco a excluir está no início da lista.
+- `pInicio = pAux->pProx`: atualiza o início para o próximo nó.
+
+Imagine uma lista com três discos:
+
+Disco A
+
+Disco B — excluir
+
+Disco C
+
+Antes: A aponta para B, e B aponta para C. Depois de ajustar os ponteiros, A aponta diretamente para C.
+
+### Parte 5 — Ajustar o nó seguinte
+
+c
+
+```
+if (pAux->pProx != NULL)
+{
+    pAux->pProx->pPrev = pAux->pPrev;
+}
+else
+{
+    pFim = pAux->pPrev;
+}
+```
+
+- `pAux->pProx != NULL`: verifica se existe um nó seguinte.
+- `pAux->pProx->pPrev = pAux->pPrev`: faz o próximo nó apontar para o nó anterior, pulando o nó excluído.
+- `else`: acontece se o nó excluído for o último da lista.
+- `pFim = pAux->pPrev`: atualiza o ponteiro do fim para o nó anterior.
+
+Esses dois ajustes garantem que a lista continue ligada corretamente.
+
+### Parte 6 — Liberar a memória
+
+c
+
+```
+free(pAux->pDisco);
+free(pAux);
+```
+
+- `free(pAux->pDisco)`: libera a memória reservada para os dados do disco.
+- `free(pAux)`: libera a memória reservada para o nó.
+
+Por que são dois `free`? Porque o programa reservou duas áreas de memória separadas: uma para a estrutura `DISCO` e outra para a estrutura `NODO`.
+
+### Parte 7 — Confirmar a exclusão
+
+c
+
+```
+printf("Disco excluído com sucesso!\n");
+
+encontrado = 1;
+break;
+```
+
+- `printf`: informa que o disco foi excluído.
+- `encontrado = 1`: registra que o código foi localizado.
+- `break`: encerra o `for`, pois o disco já foi encontrado e removido.
+
+Depois do laço:
+
+c
+
+```
+if (encontrado == 0)
+{
+    printf("Código não encontrado nos resultados da busca.\n");
+}
+```
+
+Se o código não apareceu nos resultados, o programa informa que não o encontrou.
+
+Por fim:
+
+c
+
+```
+else
+{
+    printf("Nenhum disco encontrado para excluir.\n");
+}
+```
+
+Esse `else` pertence ao `if (auxPos > 0)`. Portanto, a mensagem aparece quando a pesquisa não encontra discos.
+
+Resumo da função: ela localiza o nó, ajusta os ponteiros anterior e próximo, atualiza `pInicio` ou `pFim` quando necessário e libera a memória do disco e do nó.
+
+## 5. Função `Minusculo(char *texto)`
+
+Essa é a função mais curta das cinco. Ela transforma todas as letras de um texto em letras minúsculas.
+
+c
+
+```
+void Minusculo(char *texto)
+{
+    int i;
+```
+
+- `void`: indica que a função não retorna um valor.
+- `Minusculo`: é o nome da função.
+- `char *texto`: recebe um ponteiro para o texto que será convertido.
+- `int i`: é a variável usada para percorrer cada caractere do texto.
+
+### Percorrer o texto
+
+c
+
+```
+for(i = 0; texto[i] != '\0'; i++)
+{
+    texto[i] = tolower(texto[i]);
+}
+```
+
+Vamos separar cada parte:
+
+- `i = 0`: começa pelo primeiro caractere, cuja posição é zero.
+- `texto[i] != '\0'`: verifica se o caractere atual não é o caractere nulo que indica o fim da string.
+- `i++`: avança para a próxima posição.
+- `tolower(texto[i])`: converte o caractere para minúsculo, quando aplicável.
+- `texto[i] = ...`: substitui o caractere original pelo resultado da conversão.
+
+O laço termina quando encontra `'\0'`.
+
+### Exemplo prático
+
+Se o texto for:
+
+c
+
+```
+char nome[] = "ROCK Nacional";
+Minusculo(nome);
+printf("%s", nome);
+```
+
+A saída será:
+
+text
+
+```
+rock nacional
+```
+
+Observe que a função modifica o próprio texto recebido. Ela não cria uma cópia.
+
+### Por que essa função é importante no programa?
+
+Na função `BuscaDisco`, ela é utilizada tanto no texto digitado pelo usuário quanto na cópia do título ou do artista.
+
+Assim, uma pesquisa por `ROCK` pode encontrar `Rock Nacional`, porque os dois textos são convertidos para minúsculas antes da comparação.
+
+Observação: `tolower` faz parte da biblioteca `ctype.h`, incluída no início do código. Para usar essa função com segurança em todos os casos, o ideal é passar `tolower((unsigned char)texto[i])`, especialmente quando o texto contém caracteres cujo valor é negativo no tipo `char`. Além disso, `tolower` depende da configuração regional e não converte corretamente todas as letras acentuadas do português em todas as configurações.
+
+## Resumo para apresentar ao professor
+
+| Função | Para que serve |
+| --- | --- |
+| `BuscaDisco` | Pesquisa discos pelo título ou artista e prepara os resultados para alteração ou exclusão. |
+| `AlteraDisco` | Localiza, pelo código, o disco que será alterado. |
+| `EditaDisco` | Pergunta quais campos o usuário deseja modificar. |
+| `ExcluiDisco` | Remove um disco da lista e libera a memória utilizada. |
+| `Minusculo` | Converte um texto para minúsculas para facilitar a pesquisa. |
+
+Uma diferença importante para lembrar: `AlteraDisco` e `ExcluiDisco` recebem o resultado da pesquisa, mas trabalham com o nó original da lista por meio do ponteiro `pNodo`. Isso permite modificar ou remover o disco verdadeiro, em vez de alterar apenas a cópia armazenada no buffer.
