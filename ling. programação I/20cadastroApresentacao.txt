@@ -8,7 +8,7 @@ Antes, entenda três conceitos que aparecem nessas funções:
 
 O símbolo `->` serve para acessar um campo de uma estrutura por meio de um ponteiro. Por exemplo, `pAtual->pProx` acessa o próximo nó da lista.
 
-## 1. Função `BuscaDisco(int op)`
+## 1. Função `BuscaDisco(int op)` !!!!!!!!!!!!!!!!!!!!!!!!! RAFA !!!!!!!!!!!!!!!!!!!!!!!!!
 
 Essa função pesquisa discos pelo título ou pelo artista. Dependendo da opção recebida, também permite alterar ou excluir um disco.
 
@@ -295,7 +295,7 @@ Essa parte é importante para entender como o menu funciona.
 
 Atenção: no menu, a opção 4 chama `BuscaDisco(4)`, então apenas pesquisa. A opção 2 chama `BuscaDisco(2)`, que pesquisa e depois permite alterar. A opção 5 chama `BuscaDisco(5)`, que pesquisa e depois permite excluir.
 
-## 2. Função `AlteraDisco(RESULTADO *bufferDiscos, int auxPos)`
+## 2. Função `AlteraDisco(RESULTADO *bufferDiscos, int auxPos)` !!!!!!!!!!!!!!!!!!!!!!!!! GUI !!!!!!!!!!!!!!!!!!!!!!!!!
 
 Essa função permite alterar os dados de um disco que apareceu nos resultados da pesquisa.
 
@@ -375,7 +375,7 @@ Esse `else` é executado sempre que o código digitado não corresponde ao códi
 
 Atenção a um detalhe: do jeito que está, a mensagem de disco não encontrado pode aparecer várias vezes durante o `for`, mesmo que o disco esteja em outra posição. O ideal seria usar uma variável para controlar se o código foi encontrado, como a função de exclusão faz.
 
-## 3. Função `EditaDisco(DISCO *pDisco)`
+## 3. Função `EditaDisco(DISCO *pDisco)` !!!!!!!!!!!!!!!!!!!!!!!!! MATEUS !!!!!!!!!!!!!!!!!!!!!!!!!
 
 Essa função pergunta individualmente se o usuário deseja alterar cada campo do disco.
 
@@ -511,7 +511,7 @@ Por exemplo, o usuário pode informar `42.5` minutos.
 
 Resumo da função: ela não cria outro disco. Ela modifica os campos do disco existente, alterando apenas aqueles para os quais o usuário respondeu `S`.
 
-## 4. Função `ExcluiDisco(RESULTADO *bufferDiscos, int auxPos)`
+## 4. Função `ExcluiDisco(RESULTADO *bufferDiscos, int auxPos)` !!!!!!!!!!!!!!!!!!!!!!!!! RAFA !!!!!!!!!!!!!!!!!!!!!!!!!
 
 Essa função exclui da lista um disco selecionado pelos resultados da pesquisa.
 
@@ -678,7 +678,7 @@ Esse `else` pertence ao `if (auxPos > 0)`. Portanto, a mensagem aparece quando a
 
 Resumo da função: ela localiza o nó, ajusta os ponteiros anterior e próximo, atualiza `pInicio` ou `pFim` quando necessário e libera a memória do disco e do nó.
 
-## 5. Função `Minusculo(char *texto)`
+## 5. Função `Minusculo(char *texto)` !!!!!!!!!!!!!!!!!!!!!!!!! MATEUS !!!!!!!!!!!!!!!!!!!!!!!!!
 
 Essa é a função mais curta das cinco. Ela transforma todas as letras de um texto em letras minúsculas.
 
